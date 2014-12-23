@@ -81,6 +81,111 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2014/12/23/java-tomc-Environments-Deployments/" title="java_tomc_Environments_Deployments" itemprop="url">java_tomc_Environments_Deployments</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="http://yoursite.com/about" title="John Doe" target="_blank" itemprop="author">John Doe</a>
+		
+  <p class="article-time">
+    <time datetime="2014-12-23T00:59:09.000Z" itemprop="datePublished"> Published Dec 23 2014</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h3 id="一、部署环境">一、部署环境</h3>
+<ul>
+<li>Centos6.6</li>
+<li>JDK8</li>
+<li>tomcat7</li>
+</ul>
+<h3 id="二、部署思路">二、部署思路</h3>
+<ul>
+<li>安装程序自定义路径（源码放入/usr/local/src，安装路径为/usr/local/）</li>
+<li>尽可能简化安装过程（选择JDK二进制文件，解压指定环境即可）</li>
+</ul>
+<h3 id="三、下载程序源码">三、下载程序源码</h3>
+<ul>
+<li><strong>JDK8</strong>从<a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target="_blank" rel="external">Java官网</a>下载</li>
+<li><strong>tomcat7</strong>从<a href="http://tomcat.apache.org/download-70.cgi" target="_blank" rel="external">Tomcat官网</a>下载</li>
+</ul>
+<h3 id="四、安装Java">四、安装Java</h3>
+<h5 id="1、创建安装目录/usr/local/java（java以后估计会使用到多个版本，全部安装到此目录，方便管理）">1、创建安装目录/usr/local/java（java以后估计会使用到多个版本，全部安装到此目录，方便管理）</h5>
+<pre><code><span class="keyword">mkdir</span> /usr/<span class="keyword">local</span>/java
+</code></pre><h5 id="2、解压源码到安装目录">2、解压源码到安装目录</h5>
+<pre><code>cd /usr/<span class="keyword">local</span>/software
+tar zxvf jdk-<span class="number">8</span>u25-linux-x64.tar.gz -C /usr/<span class="keyword">local</span>/java/
+tar zxvf apache-tomcat-<span class="number">7.0</span><span class="number">.57</span>.tar.gz -C /usr/<span class="keyword">local</span>/java/   #（tomcat也解压到/usr/<span class="keyword">local</span>/java目录）
+</code></pre><h5 id="3、将java及tomcat加入环境变量">3、将java及tomcat加入环境变量</h5>
+<pre><code><span class="input"><span class="prompt">cat &gt;&gt;</span> /etc/profile &lt;&lt; <span class="constant">EOF</span></span>
+<span class="comment">#java8</span>
+<span class="constant">JAVA_HOME</span>=<span class="regexp">/usr/local</span><span class="regexp">/java/jdk</span>1.<span class="number">8.0_25</span>
+<span class="constant">JRE_HOME</span>=<span class="regexp">/usr/local</span><span class="regexp">/java/jdk</span>1.<span class="number">8.0_25</span>/jre
+<span class="constant">PATH</span>=\<span class="variable">$PATH</span><span class="symbol">:</span>\<span class="variable">$JAVA_HOME</span>/<span class="symbol">bin:</span>\<span class="variable">$JRE_HOME</span>/bin
+<span class="constant">CLASSPATH</span>=.<span class="symbol">:</span>\<span class="variable">$JAVA_HOME</span>/lib/dt.<span class="symbol">jar:</span>\<span class="variable">$JRE_HOME</span>/lib/tootls.jar
+export <span class="constant">JAVA_HOME</span> <span class="constant">JRE_HOME</span> <span class="constant">PATH</span> <span class="constant">CLASSPATH</span>
+<span class="comment">#tomcat7</span>
+export <span class="constant">TOMCAT_HOME</span>=<span class="regexp">/usr/local</span><span class="regexp">/java/apache</span>-tomcat-<span class="number">7.0</span>.<span class="number">57</span>
+export <span class="constant">CATALINA_HOME</span>=<span class="regexp">/usr/local</span><span class="regexp">/java/apache</span>-tomcat-<span class="number">7.0</span>.<span class="number">57</span>
+<span class="constant">EOF</span>
+</code></pre><h5 id="4、不重启使刚加入的环境变量生效">4、不重启使刚加入的环境变量生效</h5>
+<pre><code><span class="keyword">source</span> /etc/<span class="keyword">profile</span>
+</code></pre><h5 id="5、启动tomcat">5、启动tomcat</h5>
+<pre><code><span class="regexp">/usr/</span>local<span class="regexp">/java/</span>apache-tomcat-<span class="number">7.0</span>.<span class="number">57</span><span class="regexp">/bin/</span>startup.sh
+</code></pre><h5 id="6、防火墙放行tomcat端口(默认8080)">6、防火墙放行tomcat端口(默认8080)</h5>
+<ul>
+<li>单机修改iptables<br>  iptables -I INPUT 3 -p tcp -m tcp —dport 8080 -j ACCEPT<br>  service iptables save</li>
+<li>单机+物理防火墙修改iptables,联系机房放行8080端口*   </li>
+</ul>
+<h5 id="7、设置tomcat开机启动">7、设置tomcat开机启动</h5>
+<pre><code>cat &gt;&gt; <span class="regexp">/etc/</span>rc.local &lt;&lt; EOF
+<span class="regexp">/usr/</span>local<span class="regexp">/java/</span>apache-tomcat-<span class="number">7.0</span>.<span class="number">57</span><span class="regexp">/bin/</span>startup.sh
+EOF
+</code></pre><h3 id="五、测试tomcat是否安装成功">五、测试tomcat是否安装成功</h3>
+<p>   在浏览器中输入http：//localhost:8080，未提示错误并显示tomcat欢迎界面安装成功</p>
+<h3 id="六、一键安装脚本java_tomcat_install-sh位于/pubilic/myscript/目录下">六、一键安装脚本java_tomcat_install.sh位于/pubilic/myscript/目录下</h3>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/java-tomcat-linux/">java tomcat linux</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2014/12/22/hello-world/" title="Hello World" itemprop="url">Hello World</a>
   </h1>
   <p class="article-author">By
@@ -153,6 +258,15 @@
   
 
   
+<div class="tagslist">
+	<p class="asidetitle">Tags</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/java-tomcat-linux/" title="java tomcat linux">java tomcat linux<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
 
   <div class="linkslist">
   <p class="asidetitle">Links</p>
